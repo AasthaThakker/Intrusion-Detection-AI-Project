@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Intrusion Detection System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="logo">
+                <div class="shield-icon">🛡️</div>
+                <h1>Network Intrusion Detection System</h1>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span>System Active</span>
+            </div>
+        </header>
+
+        <!-- Info Section -->
+        <section class="info-section">
+            <div class="info-card">
+                <h2>About This System</h2>
+                <p>This Network Intrusion Detection System (NIDS) uses advanced K-Nearest Neighbors (KNN) machine learning algorithm to analyze network traffic patterns and identify potential security threats in real-time.</p>
+                <div class="features">
+                    <div class="feature-item">
+                        <span class="icon">🔍</span>
+                        <span>Real-time Analysis</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="icon">🎯</span>
+                        <span>High Accuracy Detection</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="icon">📊</span>
+                        <span>Visual Analytics</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section class="upload-section">
+            <div class="upload-card">
+                <h2>Upload Network Traffic Data</h2>
+                <div class="input-methods">
+                    <div class="method-tabs">
+                        <button class="tab-btn active" onclick="switchTab('csv')">
+                            📁 CSV Upload
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('text')">
+                            📝 Paste Logs
+                        </button>
+                    </div>
+
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <!-- CSV Upload -->
+                        <div id="csv-tab" class="tab-content active">
+                            <div class="file-upload-area" id="dropZone">
+                                <div class="upload-icon">📤</div>
+                                <p>Drag and drop your CSV file here</p>
+                                <p class="upload-hint">or click to browse</p>
+                                <input type="file" id="fileInput" name="file" accept=".csv" hidden>
+                                <button type="button" class="browse-btn" onclick="document.getElementById('fileInput').click()">
+                                    Browse Files
+                                </button>
+                            </div>
+                            <div id="fileName" class="file-name"></div>
+                        </div>
+
+                        <!-- Text Input -->
+                        <div id="text-tab" class="tab-content">
+                            <textarea 
+                                id="dataInput" 
+                                name="data" 
+                                placeholder="Paste your network logs here (supports both comma and tab separated)...&#10;&#10;Example (Comma-separated):&#10;Source_IP,Port,Request_Type,Protocol,Payload_Size,User_Agent,Status,Label,Scan_Type,Timestamp&#10;192.168.1.1,80,GET,HTTP,1024,Mozilla/5.0,Success,0,Normal,2025-11-13&#10;&#10;Example (Tab-separated):&#10;207.137.133.231&#9;8443&#9;TELNET&#9;TCP&#9;927&#9;PostmanRuntime/7.26.8&#9;Success&#9;1&#9;SQLInjection&#9;2025-11-13"
+                                rows="10"
+                            ></textarea>
+                        </div>
+
+                        <button type="submit" class="analyze-btn" id="analyzeBtn">
+                            <span class="btn-text">🔬 Analyze Traffic</span>
+                            <span class="loading-spinner" style="display: none;">⚡ Analyzing...</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection" style="display: none;">
+            <h2>Analysis Results</h2>
+            
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-total">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <h3>Total Records</h3>
+                        <p class="stat-value" id="totalRecords">0</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-intrusion">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-content">
+                        <h3>Intrusions Detected</h3>
+                        <p class="stat-value" id="intrusionCount">0</p>
+                        <p class="stat-percentage" id="intrusionPercentage">0%</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-normal">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3>Normal Traffic</h3>
+                        <p class="stat-value" id="normalCount">0</p>
+                        <p class="stat-percentage" id="normalPercentage">0%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualizations -->
+            <div class="viz-grid">
+                <div class="viz-card">
+                    <h3>Traffic Distribution</h3>
+                    <canvas id="pieChart"></canvas>
+                </div>
+                <div class="viz-card">
+                    <h3>3D Network Topology</h3>
+                    <div id="threeDView"></div>
+                </div>
+            </div>
+
+            <!-- Detailed Results Table -->
+            <div class="table-card">
+                <h3>Detailed Analysis</h3>
+                <div class="table-wrapper">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>Record #</th>
+                                <th>Status</th>
+                                <th>Threat Level</th>
+                                <th>Why Flagged?</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
